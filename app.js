@@ -4,9 +4,10 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var passport = require('passport');
 
 var routes = require('./routes/index');
-var users = require('./routes/users');
+var secrets = require('./secrets.js');
 
 var app = express();
 
@@ -22,8 +23,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/users', users);
+var flash = require('connect-flash');
+app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+var initPassport = require('./passport/fb-init.js');
+initPassport(passport);
+
+app.use('/', routes)(passport);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
