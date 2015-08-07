@@ -127,19 +127,17 @@ router.get('/:languageCode/:twitterHandle', function (req, res) {
 				}
 			}
 			var finalString = finalStringArray.join(' ');
-			if(req.params.languageCode !== 'en') {
-				var params = {
-					text: finalString,
-					from: 'en',
-					to: req.params.languageCode
-				};
-				client.translate(params, function (err, data) {
-					finalString = data;
+			var params = {
+				text: finalString,
+				from: 'en',
+				to: req.params.languageCode
+			};
+			client.translate(params, function (err, data) {
+				finalString = data;
+				finalString = 'Lorem ipsum ' + finalString;
+				res.render('twitterHandle', {
+					text: finalString
 				});
-			} 
-			var finalString = 'Lorem ipsum ' + finalString;
-			res.render('twitterHandle', {
-				text: finalString
 			});
 		});
 	});
