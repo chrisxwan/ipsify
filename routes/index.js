@@ -24,20 +24,73 @@ var client = new mstranslator({
 	client_secret: secrets.microsoft.client_secret
 }, true);
 
+var languageLookup = {
+	'English': 'en',
+	'Arabic' : 'ar',
+	'Bosnian (Latin)': 'bs-Latn',
+	'Bulgarian': 'bg',
+	'Catalan': 'ca',
+	'Chinese Simplified': 'zh-CHS',
+	'Chinese Traditional': 'zh-CHT',
+	'Croatian': 'hr',
+	'Czech': 'cs',
+	'Danish': 'da',
+	'Dutch': 'nl',
+	'Estonian': 'et',
+	'Finnish': 'fi',
+	'French': 'fr',
+	'German': 'de',
+	'Greek': 'el',
+	'Hebrew': 'he',
+	'Hindi': 'hi',
+	'Hungarian': 'hu',
+	'Indonesian': 'id',
+	'Italian': 'id',
+	'Japanese': 'ja',
+	'Klingon': 'tlh',
+	'Klingon (plqaD)': 'tlh-Qaak',
+	'Korean': 'ko',
+	'Latvian': 'lv',
+	'Lithuanian': 'lt',
+	'Malay': 'ms',
+	'Norwegian': 'no',
+	'Persian': 'fa',
+	'Polish': 'pl',
+	'Portuguese': 'pt',
+	'Romanian': 'ro',
+	'Russian': 'ru',
+	'Serbian (Cyrillic)': 'sr-Cyrl',
+	'Serbian (Latin)': 'sr-Latn',
+	'Slovak': 'sk',
+	'Slovenian': 'sl',
+	'Spanish': 'es',
+	'Swedish': 'sv',
+	'Thai': 'th',
+	'Turkish': 'tr',
+	'Ukrainian': 'uk',
+	'Urdu': 'ur',
+	'Vietnamese': 'vi',
+	'Welsh': 'cy'
+};
+
 
 /* GET login page. */
 router.get('/', function(req, res) {
 	// Display the Login page with any flash message, if any
+	var languages = Object.keys(languageLookup);
 	res.render('index');
 });
-
+	
 /* Handle Login POST */
 router.post('/ipsify', function (req, res, next) {
 	var twitterHandle = req.body.twitterHandle;
-	res.redirect('/' + twitterHandle);
+	// var numParagraphs = req.body.numParagraphs;
+	var language = req.body.language;
+	var languageCode = languageLookup.language;
+	res.redirect('/' + languageCode + '/' + twitterHandle );
 });
 
-router.get('/:twitterHandle', function (req, res) {
+router.get('/:languageCode/:twitterHandle', function (req, res) {
 	var twitterHandle = req.params.twitterHandle;
 	var options = {
 		screen_name: twitterHandle,
@@ -70,6 +123,16 @@ router.get('/:twitterHandle', function (req, res) {
 				if(filteredText !== '') {
 					finalStringArray.push(filteredText);
 				}
+			}
+			if(req.params.languageCode !== 'en') {
+				var params = {
+					text: finalString,
+					from: 'en',
+					to: req.params.languageCode
+				};
+				client.translate(params, function (err, data) {
+					console.log(data);
+				});
 			}
 			var finalString = 'Lorem ipsum ' + finalStringArray.join(' ');
 			res.render('twitterHandle', {
