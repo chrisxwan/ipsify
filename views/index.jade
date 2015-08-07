@@ -4,13 +4,16 @@ block content
 	div.container
 		div.row
 			div.col-sm-6.col-md-3.col-md-offset-4
-				img(src='/stylesheets/images/passportjs-logo.png', class='logo-img')
 				h1.text-center.login-title Enter a Twitter handle
-				form#signupFormHelper.form-horizontal(method='POST', action='/ipsify')
+				form#ipsify.form-horizontal(method='POST', action='/ipsify')
 					input(type='hidden', name='_csrf', value=_csrf)
 					.form-group
 						.col-sm-6            
 						input.form-control(type='text', name='twitterHandle' id='twitterHandle' placeholder='Twitter Handle', autofocus)
 					.form-group
+						select.form-control(name='language', form="ipsify")
+							each language in languages
+								option= language
+					.form-group
 						.col-sm-7
-						button.btn.styled-button#signupButton(type='submit') Signup
+						button.btn.styled-button#submit(type='submit') Submit

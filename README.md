@@ -1,3 +1,3 @@
 # ipsify
 
-To run, `npm install` and then `mongod --config /usr/local/etc/mongod.conf`  
+To run, `npm install` and then `node bin/www`

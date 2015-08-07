@@ -78,7 +78,9 @@ var languageLookup = {
 router.get('/', function(req, res) {
 	// Display the Login page with any flash message, if any
 	var languages = Object.keys(languageLookup);
-	res.render('index');
+	res.render('index', {
+		languages: languages
+	});
 });
 	
 /* Handle Login POST */
@@ -86,7 +88,7 @@ router.post('/ipsify', function (req, res, next) {
 	var twitterHandle = req.body.twitterHandle;
 	// var numParagraphs = req.body.numParagraphs;
 	var language = req.body.language;
-	var languageCode = languageLookup.language;
+	var languageCode = languageLookup[language];
 	res.redirect('/' + languageCode + '/' + twitterHandle );
 });
 
@@ -124,6 +126,7 @@ router.get('/:languageCode/:twitterHandle', function (req, res) {
 					finalStringArray.push(filteredText);
 				}
 			}
+			var finalString = finalStringArray.join(' ');
 			if(req.params.languageCode !== 'en') {
 				var params = {
 					text: finalString,
@@ -131,10 +134,10 @@ router.get('/:languageCode/:twitterHandle', function (req, res) {
 					to: req.params.languageCode
 				};
 				client.translate(params, function (err, data) {
-					console.log(data);
+					finalString = data;
 				});
-			}
-			var finalString = 'Lorem ipsum ' + finalStringArray.join(' ');
+			} 
+			var finalString = 'Lorem ipsum ' + finalString;
 			res.render('twitterHandle', {
 				text: finalString
 			});
