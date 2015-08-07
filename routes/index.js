@@ -74,6 +74,10 @@ var languageLookup = {
 };
 
 
+function getRandomPeriod() {
+    return Math.floor(Math.random() * (12 + 1)) + 8;
+}
+
 /* GET login page. */
 router.get('/', function(req, res) {
 	// Display the Login page with any flash message, if any
@@ -113,6 +117,9 @@ router.get('/:languageCode/:twitterHandle', function (req, res) {
 		var finalStringArray = [];
 		alchemyapi.keywords("text", concatenatedTweets, { 'maxRetrieve' : 100 }, function (response) {
 			keywordsJSON = response['keywords'];
+			var period = getRandomPeriod();
+			var periodCounter = 0;
+			var capitalize = false;
 			for(var i = 0; i < keywordsJSON.length; i++) {
 				var unfilteredText = keywordsJSON[i]['text'];
 				var textArray = unfilteredText.split(' ');
@@ -121,8 +128,19 @@ router.get('/:languageCode/:twitterHandle', function (req, res) {
 						textArray.splice(j, 1);
 					}
 				}
+				periodCounter++;
 				var filteredText = textArray.join(' ');
 				if(filteredText !== '') {
+					if(capitalize) {
+						filteredText = filteredText.charAt(0).toUpperCase() + filteredText.slice(1);
+						capitalize = false;
+					}
+					if(periodCounter === period) {
+						periodCounter = 0;
+						period = getRandomPeriod();
+						filteredText += '. ';
+						capitalize = true;
+					}
 					finalStringArray.push(filteredText);
 				}
 			}
