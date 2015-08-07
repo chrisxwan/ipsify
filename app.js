@@ -1,14 +1,10 @@
 var express = require('express');
 var path = require('path');
+var session = require('express-session');
 var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
-var dbConfig = require('./db');
-var mongoose = require('mongoose');
-// Connect to DB
-mongoose.connect(dbConfig.url);
 
 var app = express();
 
@@ -23,24 +19,15 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configuring Passport
-var passport = require('passport');
-var expressSession = require('express-session');
-// TODO - Why Do we need this key ?
-app.use(expressSession({secret: 'mySecretKey'}));
-app.use(passport.initialize());
-app.use(passport.session());
-
  // Using the flash middleware provided by connect-flash to store messages in session
  // and displaying in templates
+app.use(session({secret: 'mySecretKey'}));
 var flash = require('connect-flash');
+app.use(cookieParser('secret'));
+app.use(session({cookie: { maxAge: 60000 }}));
 app.use(flash());
 
-// Initialize Passport
-var initPassport = require('./passport/init');
-initPassport(passport);
-
-var routes = require('./routes/index')(passport);
+var routes = require('./routes/index');
 app.use('/', routes);
 
 /// catch 404 and forward to error handler

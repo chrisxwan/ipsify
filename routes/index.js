@@ -1,72 +1,88 @@
 var express = require('express');
 var router = express.Router();
+var async = require('async');
 
-var isAuthenticated = function (req, res, next) {
-	// if user is authenticated in the session, call the next() to call the next request handler 
-	// Passport adds this method to request object. A middleware is allowed to add properties to
-	// request and response objects
-	if (req.isAuthenticated())
-		return next();
-	// if the user is not authenticated then redirect him to the login page
-	res.redirect('/');
+var Twitter = require('twitter-js-client').Twitter;
+var secrets = require('../secrets.js');
+var AlchemyAPI = require ('./alchemyapi');
+var alchemyapi = new AlchemyAPI();
+//Get this data from your twitter apps dashboard
+var config = {
+    "consumerKey": secrets.twitter.apikey,
+    "consumerSecret": secrets.twitter.apisecret,
+    "accessToken": secrets.twitter.accesstoken,
+    "accessTokenSecret": secrets.twitter.accesstokensecret,
+    "callBackUrl": secrets.twitter.callbackUrl
 }
 
-module.exports = function(passport){
+var twitter = new Twitter(config);
 
-	/* GET login page. */
-	router.get('/', function(req, res) {
-    	// Display the Login page with any flash message, if any
-		res.render('index', { message: req.flash('message') });
+var mstranslator = require('mstranslator');
+
+var client = new mstranslator({
+	client_id: secrets.microsoft.client_id,
+	client_secret: secrets.microsoft.client_secret
+}, true);
+
+
+/* GET login page. */
+router.get('/', function(req, res) {
+	// Display the Login page with any flash message, if any
+	res.render('index');
+});
+
+/* Handle Login POST */
+router.post('/ipsify', function (req, res, next) {
+	var twitterHandle = req.body.twitterHandle;
+	res.redirect('/' + twitterHandle);
+});
+
+router.get('/:twitterHandle', function (req, res) {
+	var twitterHandle = req.params.twitterHandle;
+	var options = {
+		screen_name: twitterHandle,
+		count: '50',
+		exclude_replies: true,
+		include_rts: false
+	}
+	twitter.getUserTimeline(options, function (data) {
+		res.render('/error');
+	}, function (data) {
+		var rawTweets = [];
+		var json = JSON.parse(data);
+		for(var i=0; i < json.length; i++) {
+			rawTweets.push(json[i]["text"]);
+		}
+		var keywords;
+		var concatenatedTweets = rawTweets.join(' ');
+		var finalStringArray = [];
+		alchemyapi.keywords("text", concatenatedTweets, { 'maxRetrieve' : 100 }, function (response) {
+			keywordsJSON = response['keywords'];
+			for(var i = 0; i < keywordsJSON.length; i++) {
+				var unfilteredText = keywordsJSON[i]['text'];
+				var textArray = unfilteredText.split(' ');
+				for(var j=0; j<textArray.length; j++) {
+					if(textArray[j].substring(0,4) === 'http') {
+						textArray.splice(j, 1);
+					}
+				}
+				var filteredText = textArray.join(' ');
+				if(filteredText !== '') {
+					finalStringArray.push(filteredText);
+				}
+			}
+			var finalString = 'Lorem ipsum ' + finalStringArray.join(' ');
+			res.render('twitterHandle', {
+				text: finalString
+			});
+		});
 	});
+});
 
-	/* Handle Login POST */
-	router.post('/login', passport.authenticate('login', {
-		successRedirect: '/home',
-		failureRedirect: '/',
-		failureFlash : true  
-	}));
+router.get('/error', function (req, res) {
+	res.render('error');
+});
 
-	/* GET Registration Page */
-	router.get('/signup', function(req, res){
-		res.render('register',{message: req.flash('message')});
-	});
-
-	/* Handle Registration POST */
-	router.post('/signup', passport.authenticate('signup', {
-		successRedirect: '/home',
-		failureRedirect: '/signup',
-		failureFlash : true  
-	}));
-
-	/* GET Home Page */
-	router.get('/home', isAuthenticated, function(req, res){
-		res.render('home', { user: req.user });
-	});
-
-	/* Handle Logout */
-	router.get('/signout', function(req, res) {
-		req.logout();
-		res.redirect('/');
-	});
-
-	// route for facebook authentication and login
-	// different scopes while logging in
-	router.get('/login/facebook', 
-		passport.authenticate('facebook', { scope : 'email' }
-	));
-
-	// handle the callback after facebook has authenticated the user
-	router.get('/login/facebook/callback',
-		passport.authenticate('facebook', {
-			successRedirect : '/home',
-			failureRedirect : '/'
-		})
-	);
-
-	return router;
-}
-
-
-
+module.exports = router;
 
 
