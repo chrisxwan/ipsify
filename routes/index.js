@@ -96,8 +96,9 @@ router.post('/ipsify', function (req, res, next) {
 	res.redirect('/' + languageCode + '/' + twitterHandle );
 });
 
-router.get('/:languageCode/:twitterHandle', function (req, res) {
+router.get('/:languageCode/:twitterHandle/:numParagraphs', function (req, res) {
 	var twitterHandle = req.params.twitterHandle;
+	var numParagraphs = req.params.numParagraphs;
 	var options = {
 		screen_name: twitterHandle,
 		count: '50',
@@ -115,8 +116,10 @@ router.get('/:languageCode/:twitterHandle', function (req, res) {
 		var keywords;
 		var concatenatedTweets = rawTweets.join(' ');
 		var finalStringArray = [];
-		alchemyapi.keywords("text", concatenatedTweets, { 'maxRetrieve' : 100 }, function (response) {
+		alchemyapi.keywords("text", concatenatedTweets, { 'maxRetrieve' : 100 * numParagraphs }, function (response) {
 			keywordsJSON = response['keywords'];
+			var numWords = keywordsJSON.length;
+			var wordsPerParagraph = numWords / numParagraphs;
 			var period = getRandomPeriod();
 			var periodCounter = 0;
 			var capitalize = false;
@@ -144,7 +147,7 @@ router.get('/:languageCode/:twitterHandle', function (req, res) {
 					finalStringArray.push(filteredText);
 				}
 			}
-			var finalString = finalStringArray.join(' ');
+			var finalString = finalStringArray.join(' ') + '.';
 			var params = {
 				text: finalString,
 				from: 'en',
@@ -154,7 +157,8 @@ router.get('/:languageCode/:twitterHandle', function (req, res) {
 				finalString = data;
 				finalString = 'Lorem ipsum ' + finalString;
 				res.render('twitterHandle', {
-					text: finalString
+					text: finalString,
+					languages: Object.keys(languageLookup)
 				});
 			});
 		});
