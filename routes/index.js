@@ -93,20 +93,23 @@ router.post('/ipsify', function (req, res, next) {
 	// var numParagraphs = req.body.numParagraphs;
 	var language = req.body.language;
 	var languageCode = languageLookup[language];
-	res.redirect('/' + languageCode + '/' + twitterHandle );
+	var numParagraphs = req.body.numParagraphs;
+	res.redirect('/' + languageCode + '/' + twitterHandle + '/' + numParagraphs );
 });
 
 router.get('/:languageCode/:twitterHandle/:numParagraphs', function (req, res) {
 	var twitterHandle = req.params.twitterHandle;
-	var numParagraphs = req.params.numParagraphs;
+	var numParagraphs = parseInt(req.params.numParagraphs);
 	var options = {
 		screen_name: twitterHandle,
-		count: '50',
+		count: 40 * numParagraphs,
 		exclude_replies: true,
 		include_rts: false
 	}
 	twitter.getUserTimeline(options, function (data) {
-		res.render('/error');
+		res.render('error', {
+			twitterHandle: twitterHandle
+		});
 	}, function (data) {
 		var rawTweets = [];
 		var json = JSON.parse(data);
@@ -116,48 +119,58 @@ router.get('/:languageCode/:twitterHandle/:numParagraphs', function (req, res) {
 		var keywords;
 		var concatenatedTweets = rawTweets.join(' ');
 		var finalStringArray = [];
+		var paragraphArray = [];
 		alchemyapi.keywords("text", concatenatedTweets, { 'maxRetrieve' : 100 * numParagraphs }, function (response) {
-			keywordsJSON = response['keywords'];
+			var keywordsJSON = response['keywords'];
 			var numWords = keywordsJSON.length;
-			var wordsPerParagraph = numWords / numParagraphs;
+			var wordsPerParagraph = Math.floor(numWords / numParagraphs);
 			var period = getRandomPeriod();
 			var periodCounter = 0;
 			var capitalize = false;
-			for(var i = 0; i < keywordsJSON.length; i++) {
-				var unfilteredText = keywordsJSON[i]['text'];
-				var textArray = unfilteredText.split(' ');
-				for(var j=0; j<textArray.length; j++) {
-					if(textArray[j].substring(0,4) === 'http') {
-						textArray.splice(j, 1);
+			var outputText = '';
+			for(var n=0; n<numParagraphs; n++) {
+				for(var i = wordsPerParagraph * n; i < wordsPerParagraph * (n+1); i++) {
+					var unfilteredText = keywordsJSON[i]['text'];
+					var textArray = unfilteredText.split(' ');
+					console.log(textArray);
+					for(var j=0; j<textArray.length; j++) {
+						if(textArray[j].substring(0,4) === 'http') {
+							textArray.splice(j, 1);
+							j--;
+						}
+					}
+					periodCounter++;
+					var filteredText = textArray.join(' ');
+					if(filteredText !== '') {
+						if(capitalize) {
+							filteredText = filteredText.charAt(0).toUpperCase() + filteredText.slice(1);
+							capitalize = false;
+						}
+						if(periodCounter === period) {
+							periodCounter = 0;
+							period = getRandomPeriod();
+							filteredText += '. ';
+							capitalize = true;
+						}
+						finalStringArray.push(filteredText);
 					}
 				}
-				periodCounter++;
-				var filteredText = textArray.join(' ');
-				if(filteredText !== '') {
-					if(capitalize) {
-						filteredText = filteredText.charAt(0).toUpperCase() + filteredText.slice(1);
-						capitalize = false;
-					}
-					if(periodCounter === period) {
-						periodCounter = 0;
-						period = getRandomPeriod();
-						filteredText += '. ';
-						capitalize = true;
-					}
-					finalStringArray.push(filteredText);
-				}
+				var finalString = finalStringArray.join(' ') + '.\n\n';
+				paragraphArray.push(finalString);
+				outputText += finalString;
+				finalStringArray = [];
+				capitalize = true;
 			}
-			var finalString = finalStringArray.join(' ') + '.';
 			var params = {
-				text: finalString,
+				text: outputText,
 				from: 'en',
 				to: req.params.languageCode
 			};
 			client.translate(params, function (err, data) {
-				finalString = data;
-				finalString = 'Lorem ipsum ' + finalString;
+				var output = data;
+				output = 'Lorem ipsum ' + output;
 				res.render('twitterHandle', {
-					text: finalString,
+					text: output,
 					languages: Object.keys(languageLookup)
 				});
 			});

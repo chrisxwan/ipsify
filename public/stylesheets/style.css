@@ -37,7 +37,7 @@ a {
     transition: 0.5s;
     background-color: #666666;
     color: white;
-    border-color: white;
+    border-color: black;
     border-width: 2px;
 }
 
