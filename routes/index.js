@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var async = require('async');
 
-var Twitter = require('twitter-js-client').Twitter;
+var Twitter = require('twitter-node-client').Twitter;
 var secrets = require('../secrets.js');
 var AlchemyAPI = require ('./alchemyapi');
 var alchemyapi = new AlchemyAPI();
