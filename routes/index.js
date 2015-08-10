@@ -8,11 +8,11 @@ var AlchemyAPI = require ('./alchemyapi');
 var alchemyapi = new AlchemyAPI();
 //Get this data from your twitter apps dashboard
 var config = {
-    "consumerKey": secrets.twitter.apikey,
-    "consumerSecret": secrets.twitter.apisecret,
-    "accessToken": secrets.twitter.accesstoken,
-    "accessTokenSecret": secrets.twitter.accesstokensecret,
-    "callBackUrl": secrets.twitter.callbackUrl
+    "consumerKey": process.env.TWITTER_CONSUMERKEY,
+    "consumerSecret": process.env.TWITTER_CONSUMERSECRET,
+    "accessToken": process.env.TWITTER_ACCESSTOKEN,
+    "accessTokenSecret": process.env.TWITTER_ACCESSTOKENSECRET,
+    "callBackUrl": process.env.TWITTER_CALLBACKURL
 }
 
 var twitter = new Twitter(config);
@@ -20,8 +20,8 @@ var twitter = new Twitter(config);
 var mstranslator = require('mstranslator');
 
 var client = new mstranslator({
-	client_id: secrets.microsoft.client_id,
-	client_secret: secrets.microsoft.client_secret
+	client_id: process.env.MICROSOFT_CLIENTID,
+	client_secret: process.env.MICROSOFT_CLIENTSECRET
 }, true);
 
 var languageLookup = {
