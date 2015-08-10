@@ -3,7 +3,7 @@ var router = express.Router();
 var async = require('async');
 
 var Twitter = require('twitter-node-client').Twitter;
-var secrets = require('../secrets.js');
+// var secrets = require('../secrets.js');
 var AlchemyAPI = require ('./alchemyapi');
 var alchemyapi = new AlchemyAPI();
 //Get this data from your twitter apps dashboard
