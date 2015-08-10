@@ -1,6 +1,7 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: #0B6B7D;
 }
 
 a {
@@ -9,17 +10,20 @@ a {
 
 #area {
     margin-top: 100px;
-    background-color: rgba(0,0,0,0.1);
+    background-color: #E0E0E0;
     border-radius: 10px;
-    padding: 20px 40px 20px 40px;
+    padding: 30px 50px 30px 50px;
     box-shadow: 3px 3px 5px #888888;
 }
 
-.login-title{
+.box-label {
     color: black;
-    font-size: 18px;
+    font-size: 14px;
+    float: left;
     font-weight: 400;
     display: block;
+    margin-left: -10px;
+    margin-top: 10px;
 }
 
 #submit {
@@ -33,11 +37,14 @@ a {
     transition: 0.3s;
 }
 
+.result {
+    background-color: #E0E0E0;
+}
+
 #submit:hover{
     transition: 0.5s;
-    background-color: #666666;
+    background-color: #73C7D6;
     color: white;
-    border-color: black;
     border-width: 2px;
 }
 

@@ -119,7 +119,6 @@ router.get('/:languageCode/:twitterHandle/:numParagraphs', function (req, res) {
 		var keywords;
 		var concatenatedTweets = rawTweets.join(' ');
 		var finalStringArray = [];
-		var paragraphArray = [];
 		alchemyapi.keywords("text", concatenatedTweets, { 'maxRetrieve' : 100 * numParagraphs }, function (response) {
 			var keywordsJSON = response['keywords'];
 			var numWords = keywordsJSON.length;
@@ -156,7 +155,6 @@ router.get('/:languageCode/:twitterHandle/:numParagraphs', function (req, res) {
 					}
 				}
 				var finalString = finalStringArray.join(' ') + '.\n\n';
-				paragraphArray.push(finalString);
 				outputText += finalString;
 				finalStringArray = [];
 				capitalize = true;
