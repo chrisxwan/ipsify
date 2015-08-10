@@ -94,7 +94,11 @@ router.post('/ipsify', function (req, res, next) {
 	var language = req.body.language;
 	var languageCode = languageLookup[language];
 	var numParagraphs = req.body.numParagraphs;
-	res.redirect('/' + languageCode + '/' + twitterHandle + '/' + numParagraphs );
+	if(twitterHandle) {
+		res.redirect('/' + languageCode + '/' + twitterHandle + '/' + numParagraphs );
+	} else {
+		res.redirect('/error');
+	}
 });
 
 router.get('/:languageCode/:twitterHandle/:numParagraphs', function (req, res) {
@@ -107,8 +111,9 @@ router.get('/:languageCode/:twitterHandle/:numParagraphs', function (req, res) {
 		include_rts: false
 	}
 	twitter.getUserTimeline(options, function (data) {
-		res.render('error', {
-			twitterHandle: twitterHandle
+		res.render('twitterHandle', {
+			text: 'Oops! The Twitter handle ' + twitterHandle + ' is not valid!',
+			languages: Object.keys(languageLookup)
 		});
 	}, function (data) {
 		var rawTweets = [];
@@ -177,8 +182,10 @@ router.get('/:languageCode/:twitterHandle/:numParagraphs', function (req, res) {
 });
 
 router.get('/error', function (req, res) {
-	res.render('error');
-});
+	res.render('error', {
+		languages: Object.keys(languageLookup)
+	});
+})
 
 module.exports = router;
 

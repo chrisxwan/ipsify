@@ -8,8 +8,18 @@ a {
   color: #00B7FF;
 }
 
+.title {
+    text-align: center;
+    font-size: 60px;
+    color: white;
+}
+
+.lorem {
+    font-size: 16px;
+}
+
 #area {
-    margin-top: 100px;
+    margin-top: 60px;
     background-color: #E0E0E0;
     border-radius: 10px;
     padding: 30px 50px 30px 50px;

@@ -1,4 +1,29 @@
 extends layout
 
 block content
-  h1 Oops! The Twitter handle #{twitterHandle} is not valid!
+	div.container
+		div.row
+			div#area.col-sm-6.col-md-6.col-md-offset-3
+					p.lorem(style='white-space:pre-wrap;') Oops! You forgot to enter a Twitter handle!
+					h1.login-title.text-center Again?
+					form#ipsify.form-horizontal(method='POST', action='/ipsify')
+						input(type='hidden', name='_csrf', value=_csrf)
+						h1.box-label Enter a Twitter handle
+						.form-group
+							.col-sm-6            
+							input.form-control(type='text', name='twitterHandle' id='twitterHandle' placeholder='Twitter Handle', autofocus)
+						h1.box-label Choose a target language
+						.form-group
+							select.form-control(name='language', form="ipsify")
+								each language in languages
+									option= language
+						h1.box-label Choose how many paragraphs
+						.form-group
+							select.form-control(name='numParagraphs', form='ipsify')
+								option 1
+								option 2
+								option 3
+								option 4
+								option 5
+						.form-group
+							button.btn.styled-button#submit(type='submit') Submit
